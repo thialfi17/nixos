@@ -7,6 +7,9 @@
 			url = "github:nix-community/home-manager/release-24.05";
 			inputs.nixpkgs.follows = "nixpkgs";
 		};
+
+		disko.url = "github:nix-community/disko";
+		disko.inputs.nixpkgs.follows = "nixpkgs";
 	};
 
 	outputs = {
@@ -17,8 +20,19 @@
 	} @ inputs: let 
 		inherit (self) outputs;
 		stateVersion = "24.05";
+		systems = [
+			"aarch64-linux"
+			"x86_64-linux"
+		];
+		forAllSystems = nixpkgs.lib.genAttrs systems;
 	in {
 		overlays = import ./overlays { inherit inputs; };
+
+		#packages = forAllSystems (
+		#	system: let
+		#		pkgs = nixpkgs.legacyPackages.${system};
+		#	in import ./pkgs { inherit pkgs; }
+		#);
 
 		nixosConfigurations = {
 			nixos = let 
@@ -32,11 +46,16 @@
 		};
 
 		homeConfigurations = {
-			"josh@nixos" = home-manager.lib.homeManagerConfiguration {
+			"josh@nixos" = let
+				username = "josh";
+				#desktop = "river";
+			in home-manager.lib.homeManagerConfiguration {
 				# TODO: replace this with a ${system} variable?
 				pkgs = nixpkgs.legacyPackages.x86_64-linux;
-				extraSpecialArgs = { inherit inputs outputs stateVersion; };
-				modules = [];
+				extraSpecialArgs = { inherit inputs outputs stateVersion username; };
+				modules = [
+					./home
+				];
 			};
 		};
 	};

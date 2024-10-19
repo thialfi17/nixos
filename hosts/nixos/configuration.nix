@@ -7,7 +7,7 @@
 {
 	imports = [
 		# Include the results of the hardware scan.
-		./hardware-configuration.nix
+		./hardware.nix
 	];
 
 	nixpkgs.overlays = [
@@ -29,7 +29,7 @@
 	fonts = {
 		packages = with pkgs; [
 			jetbrains-mono
-			(nerdfonts.override { fonts = [ "Hack" ]; })
+			(nerdfonts.override { fonts = [ "Hack" "JetBrainsMono" ]; })
 		];
 		fontconfig = {
 		defaultFonts = {
@@ -67,6 +67,8 @@
 	# Define a user account. Don't forget to set a password with ‘passwd’.
 	users.users.josh = {
 		isNormalUser = true;
+		# Don't require a password for initial login
+		initialHashedPassword = "";
 		extraGroups = [
 			"audio"
 			"wheel"
@@ -81,15 +83,18 @@
 	# List packages installed in system profile. To search, run:
 	# $ nix search wget
 	environment.systemPackages = with pkgs; [
-		pkgs.unstable.neovim
+		unstable.neovim
 		virtiofsd
 		cage
 		wget
+		gcc
 		river
 		river-luatile
+		rofi-wayland
+		waybar
+		wezterm
 		git
-		pkgs.unstable.alacritty
-		konsole
+		unstable.alacritty
 	];
 
 	# Enable OpenGL to workaround river and cage not setting it
